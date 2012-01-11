@@ -88,7 +88,7 @@ public class LLOneParser {
 		do {
 			
 			for(NonterminalSymbol A : grammar.getNonterminals()) {
-				for(List<Symbol> prod:grammar.getProduction(A.getSymbol())) {
+				for(List<Symbol> prod:grammar.getProductions(A)) {
 					if(prevFirst.get(prod.get(0)).size()!=0) {
 						nextFirst.get(A).addAll(prevFirst.get(prod.get(0)));
 					}
