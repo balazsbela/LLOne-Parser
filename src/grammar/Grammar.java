@@ -54,7 +54,7 @@ public class Grammar {
 	 *            - the non-terminal symbol
 	 * @return - it's list of production
 	 */
-	public List<List<Symbol>> getProduction(String nonTerminal) {
+	public List<List<Symbol>> getProductions(Symbol nonTerminal) {
 		return productions.get(nonTerminal);
 	}
 
@@ -112,7 +112,7 @@ public class Grammar {
 	 * @throws Exception 
 	 */
 	public void addProduction(String nonterm, String prod) throws Exception {
-		if (!productions.containsKey(new Symbol(nonterm))) {
+		if (!productions.containsKey(new NonterminalSymbol(nonterm))) {
 			productions.put(new NonterminalSymbol(nonterm), new ArrayList<List<Symbol>>());
 		}
 		
@@ -145,7 +145,6 @@ public class Grammar {
 	 * @throws Exception 
 	 */
 	public void addProductions(String prod) throws Exception {
-		productions.clear();
 		String lhs = prod.split("->")[0].trim();
 		String rhs = prod.split("->")[1].trim();
 
@@ -180,6 +179,30 @@ public class Grammar {
 		
 		reader.close();
 
+	}
+	 
+	/**
+	 * 
+	 * @param containingSymbol 
+	 * 				-symbol that has to be present on the RHS of a production
+	 * @return
+	 * 				-all production A -> P where P is a list of symbols that contains containingSymbol
+	 */
+	public Map<NonterminalSymbol , List<List<Symbol>>> getProductionsWithRHS(Symbol containingSymbol) {
+		
+		Map<NonterminalSymbol , List<List<Symbol>>> result = new HashMap<NonterminalSymbol, List<List<Symbol>>>();
+		
+		for ( NonterminalSymbol nonterm : productions.keySet() ) {
+			for ( List<Symbol> prod : productions.get(nonterm) ) {
+				if (prod.contains(containingSymbol)) {
+					if ( !result.keySet().contains(nonterm) ) {
+						result.put(nonterm, new ArrayList<List<Symbol>>());
+					}
+					result.get(nonterm).add(prod);
+				}
+			}
+		}
+		return result;
 	}
 
 }

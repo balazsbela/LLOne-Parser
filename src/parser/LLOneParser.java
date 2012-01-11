@@ -2,11 +2,12 @@ package parser;
 
 import grammar.Grammar;
 import grammar.NonterminalSymbol;
-import grammar.Production;
 import grammar.Symbol;
 import grammar.TerminalSymbol;
-import grammar_ref.NonTerminalSymbol;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class LLOneParser {
 	private Map<Symbol, Set<Symbol>> first;
 	
 	/** The 'follow' construction. */
-	private Map<NonTerminalSymbol, List<Symbol>> follow;
+	private Map<NonterminalSymbol, Set<Symbol>> follow;
 		
 	/** The 'alpha' stack, initially containing the input sequence. */
 	private Stack<TerminalSymbol> alpha;
@@ -100,8 +101,86 @@ public class LLOneParser {
 	public void test() {
 	}
 	
+	private Symbol getSymbolAfter(List<Symbol> productionRHS , Symbol symbol) {
+		
+		for ( int i=0 ; i<productionRHS.size() ; i++) {
+			if ( productionRHS.get(i).equals(symbol) ) {
+				if ( i==productionRHS.size()-1 ) {
+					return Grammar.EPSILON;
+				} else {
+					return productionRHS.get(i+1);
+				}
+			}
+		}
+		return null;
+	}
+	
 	public void createFollow() {
-		System.err.println("");
+		
+		follow = new HashMap<NonterminalSymbol,Set<Symbol>>();
+		// two instances of follow are used to keep track of changes
+		HashMap<NonterminalSymbol,Set<Symbol>> followBefore = new HashMap<NonterminalSymbol,Set<Symbol>>();
+		HashMap<NonterminalSymbol,Set<Symbol>> followAfter = new HashMap<NonterminalSymbol,Set<Symbol>>();
+		
+		// initialize follow 
+		// empty set for every nonterminal 
+		// E for the starting symbol
+		for ( NonterminalSymbol nonterm : grammar.getNonterminals() ) {
+			followBefore.put(nonterm, new HashSet<Symbol>());
+			if ( nonterm.equals(grammar.getStartingSymbol()) ) {
+				followBefore.get(nonterm).add( Grammar.EPSILON );
+			}
+		}
+		
+		// repeat while a change is made 
+		boolean changed;
+		do {
+			
+			changed = false;
+			// copy the followBefore into followAfter
+			followAfter.clear();
+			for ( NonterminalSymbol nonterm : followBefore.keySet() ) {
+				followAfter.put(nonterm, new HashSet<Symbol>());
+				followAfter.get(nonterm).addAll( followBefore.get(nonterm) );
+			}
+			
+			// iterate through all the nonterminals
+			for ( NonterminalSymbol nonterm : grammar.getNonterminals() ) {
+
+				// iterate through all the productions with nonterm on their RHS with the form:
+				// prodNonterminal -> productionRHS 
+				Map<NonterminalSymbol , List<List<Symbol>>> productionsWithNontermOnRHS = grammar.getProductionsWithRHS(nonterm);
+				
+				for (NonterminalSymbol prodNonterminal : productionsWithNontermOnRHS.keySet()) {
+					for (List<Symbol> productionRHS : productionsWithNontermOnRHS.get(prodNonterminal)) {
+						
+						// followAfter = followBefore + FIRST(symbol after nonterm)
+						Symbol symbolAfter = getSymbolAfter(productionRHS, nonterm);
+						changed = followAfter.get(nonterm).addAll( first.get(symbolAfter) );
+						// if the FIRST(symbol after nonterm) contains EPSILON add FOLLOWbefore( prodNonterminal )
+						if ( first.get(symbolAfter).contains(Grammar.EPSILON) ) {
+							changed = changed || followAfter.get(nonterm).addAll( followBefore.get(prodNonterminal) );
+						}
+					}
+				}
+			}
+ 			
+			// make followAfter the new followBefore
+			followBefore.clear();
+			for ( NonterminalSymbol nonterm : followAfter.keySet() ) {
+				followBefore.put(nonterm, new HashSet<Symbol>());
+				followBefore.get(nonterm).addAll( followAfter.get(nonterm) );
+			}			
+			
+			
+		} while (changed);
+		
+		// save follow
+		for ( NonterminalSymbol nonterm : followAfter.keySet() ) {
+			follow.put(nonterm, new HashSet<Symbol>());
+			follow.get(nonterm).addAll( followAfter.get(nonterm) );
+		}			
+		
 	}
 		
 }
