@@ -1,4 +1,4 @@
-package grammar;
+package grammar_ref;
 
 @SuppressWarnings("unchecked")
 public class NonTerminalSymbol implements Comparable,Symbol {

@@ -1,4 +1,4 @@
-package grammar;
+package grammar_ref;
 
 public interface Symbol {
 
