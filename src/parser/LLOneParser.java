@@ -96,4 +96,8 @@ public class LLOneParser {
 		printTypeFirstMap(first);
 	}
 	
+	
+	public void test() {
+	
+	}
 }
