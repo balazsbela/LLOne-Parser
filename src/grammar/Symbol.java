@@ -1,10 +1,12 @@
 package grammar;
 
-public class Symbol {
+import grammar_ref.TerminalSymbol;
+
+public class Symbol implements Comparable{
 
 	private String symbol;
 	
-	Symbol(String symbol) {
+	public Symbol(String symbol) {
 		this.symbol = symbol;
 	}
 	
@@ -40,6 +42,11 @@ public class Symbol {
 	@Override
 	public String toString() {
 		return symbol;
+	}	
+	
+	@Override
+	public int compareTo(Object o) {
+		return (o instanceof Symbol) ? (symbol.compareTo(((Symbol) o).getSymbol())) : -1  ;
 	}	
 	
 }
