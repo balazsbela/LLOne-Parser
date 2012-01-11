@@ -6,5 +6,5 @@ public class TerminalSymbol extends Symbol {
 		super(symbol);
 		// TODO Auto-generated constructor stub
 	}
-
+	
 }

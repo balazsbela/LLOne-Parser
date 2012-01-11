@@ -98,6 +98,9 @@ public class LLOneParser {
 	
 	
 	public void test() {
+	}
 	
+	public void createFollow() {
+		
 	}
 }
