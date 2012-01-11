@@ -1,4 +1,4 @@
-package grammar;
+package grammar_old;
 
 public class Pair {
 	private String state;
