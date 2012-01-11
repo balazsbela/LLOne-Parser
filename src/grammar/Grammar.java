@@ -12,10 +12,10 @@ public class Grammar {
 
 	public static final Symbol EPSILON = new Symbol("E");
 
-	List<Symbol> nonterminals = new ArrayList<Symbol>();
-	List<Symbol> alphabet = new ArrayList<Symbol>();
-	Map<Symbol, List<List<Symbol>>> productions = new HashMap<Symbol, List<List<Symbol>>>();
-	Symbol startingSymbol;
+	List<NonterminalSymbol> nonterminals = new ArrayList<NonterminalSymbol>();
+	List<TerminalSymbol> alphabet = new ArrayList<TerminalSymbol>();
+	Map<NonterminalSymbol, List<List<Symbol>>> productions = new HashMap<NonterminalSymbol, List<List<Symbol>>>();
+	NonterminalSymbol startingSymbol;
 
 	public Grammar() {
 
@@ -26,7 +26,7 @@ public class Grammar {
 	 * 
 	 * @return - the set of non terminal symbols
 	 */
-	public List<Symbol> getNonterminals() {
+	public List<NonterminalSymbol> getNonterminals() {
 		return nonterminals;
 	}
 
@@ -35,7 +35,7 @@ public class Grammar {
 	 * 
 	 * @return - the set of terminal symbols
 	 */
-	public List<Symbol> getAlphabet() {
+	public List<TerminalSymbol> getAlphabet() {
 		return alphabet;
 	}
 
@@ -44,7 +44,7 @@ public class Grammar {
 	 * 
 	 * @return
 	 */
-	public Map<Symbol, List<List<Symbol>>> getProductions() {
+	public Map<NonterminalSymbol, List<List<Symbol>>> getProductions() {
 		return productions;
 	}
 
@@ -77,7 +77,7 @@ public class Grammar {
 	public void addNonterminals(String[] non) {
 		nonterminals.clear();
 		for (String s : non) {
-			nonterminals.add( new Symbol(s) );
+			nonterminals.add( new NonterminalSymbol(s) );
 		}
 	}
 
@@ -90,7 +90,7 @@ public class Grammar {
 	public void addAlphabet(String[] alp) {
 		alphabet.clear();
 		for (String a : alp) {
-			alphabet.add(new Symbol(a));
+			alphabet.add(new TerminalSymbol(a));
 		}
 	}
 
@@ -100,7 +100,7 @@ public class Grammar {
 	 * @param startingSymbol
 	 */
 	public void setStartingSymbol(String startingSymbol) {
-		this.startingSymbol = new Symbol(startingSymbol);
+		this.startingSymbol = new NonterminalSymbol(startingSymbol);
 	}
 
 	/**
@@ -110,14 +110,26 @@ public class Grammar {
 	 *            - the nonterminal symbol
 	 * @param prod
 	 *            - the production
+	 * @throws Exception 
 	 */
-	public void addProduction(String nonterm, String prod) {
-		if (productions.containsKey(nonterm)) {
-			productions.get(nonterm).add(prod);
-		} else {
-			productions.put(nonterm, new ArrayList<String>());
-			productions.get(nonterm).add(prod);
+	public void addProduction(String nonterm, String prod) throws Exception {
+		if (!productions.containsKey(nonterm)) {
+			productions.put(new NonterminalSymbol(nonterm), new ArrayList<List<Symbol>>());
 		}
+		
+		List<Symbol> productionRHS = new ArrayList<Symbol>();
+		
+		for ( String symbol : prod.split("\\s+") ) {
+			if ( nonterminals.contains(symbol) ) {
+				productionRHS.add(new NonterminalSymbol(symbol));
+			} else if (alphabet.contains(symbol)) {
+				productionRHS.add(new TerminalSymbol(symbol));
+			} else {
+				throw new Exception("Unsupported Symbol");
+			}
+		}
+		
+		productions.get(nonterm).add(productionRHS);	
 	}
 
 	/**
@@ -125,8 +137,9 @@ public class Grammar {
 	 * 
 	 * @param prods
 	 *            - array of productions
+	 * @throws Exception 
 	 */
-	public void addProductions(String[] prods) {
+	public void addProductions(String[] prods) throws Exception {
 		productions.clear();
 		for (String prod : prods) {
 			String lhs = prod.split("->")[0];
@@ -158,336 +171,10 @@ public class Grammar {
 		line = reader.readLine().split(" ");
 		addProductions(line);
 
-		startingSymbol = reader.readLine();
+		startingSymbol = new NonterminalSymbol( reader.readLine() );
 
 		reader.close();
 
 	}
 
-	/*
-	 * Verify if a grammar is right linear A grammar is said to be right linear
-	 * if every productions has the form A->a or A->aB , where A,B are
-	 * nonterminals and a is a symbol from alphabet
-	 */
-	public boolean isRightLinear() {
-		for (String leftHandSide : productions.keySet()) {
-
-			for (String production : productions.get(leftHandSide)) {
-				// when: A->a
-				// ignore E
-				if (production.length() == 1) {
-					if (!alphabet.contains(String.valueOf(production.charAt(0))) && production.charAt(0) != EPSILON) {
-						return false;
-					}
-					// when: A->aB
-				} else if (production.length() == 2) {
-					if (!alphabet.contains(String.valueOf(production.charAt(0)))
-							|| !nonterminals.contains(production.substring(1, 2))) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-
-		}
-		return true;
-	}
-
-	/**
-	 * Verifies if the given nonterminal is present in the right hand side of
-	 * any production
-	 * 
-	 * @return - true if a non terminal symbol is in the right hand side of any
-	 *         production in P.
-	 */
-	private boolean isInRHSofAnyProduction(String nonTerminal) {
-		for (String lhp : productions.keySet()) {
-
-			for (String prod : productions.get(lhp)) {
-				if (prod.contains(nonTerminal)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * 
-	 * Verify if a grammar is regular
-	 * 
-	 * A grammar is said to be regular if 1. It's right-linear 2. For any
-	 * production S->E S is not present in the RHS of any production
-	 * 
-	 * @return -boolean if the grammar is regular
-	 */
-	public boolean isRegular() {
-		for (String lhp : productions.keySet()) {
-			for (String prod : productions.get(lhp)) {
-				if (prod.charAt(0) == EPSILON) {
-					if (lhp.equals(startingSymbol) && isInRHSofAnyProduction(startingSymbol)) {
-						return false;
-					}
-					if (!lhp.equals(startingSymbol)) {
-						return false;
-					}
-				}
-			}
-		}
-		return isRightLinear();
-	}
-
-	/*
-	 * Convert grammar to the corresponding finite automata
-	 */
-	public FiniteAutomata toFiniteAutomata() {
-
-		// Has to be regular, to be able to convert it
-		if (!isRegular()) {
-			return null;
-		}
-
-		FiniteAutomata finiteAutomata = new FiniteAutomata();
-
-		// Final state that will be added as a complementary state
-		String finalState = "K";
-
-		// Add states
-		finiteAutomata.addStates(Arrays.asList("K").toArray(new String[0]));
-		finiteAutomata.addStates(nonterminals.toArray(new String[0]));
-		// nonterminals.remove(finalState);
-
-		// Add alphabet
-		finiteAutomata.addAlphabet(alphabet.toArray(new String[0]));
-
-		// Add final states
-		List<String> finals = new ArrayList<String>();
-
-		// Final states are composed of finalState + S if we have
-		// S->E
-		finals.add(finalState);
-
-		for (String prod : productions.get(startingSymbol)) {
-			if (prod.equals(String.valueOf(EPSILON))) {
-				finals.add(startingSymbol);
-			}
-		}
-
-		finiteAutomata.addFinalStates(finals.toArray(new String[0]));
-
-		// convert productions after the following rules:
-		// A->a becomes (A,a)=finalState
-		// A->aB becomes (A,a)=B
-		for (String nonterminal : productions.keySet()) {
-			for (String production : productions.get(nonterminal)) {
-
-				// case 1: A->a , ignore E(epsilon)
-				if (production.length() == 1 && production.charAt(0) != EPSILON) {
-					finiteAutomata.addTransition(new Pair(nonterminal, production), finalState);
-					// case 2: A->aB
-				} else if (production.length() == 2) {
-					finiteAutomata.addTransition(new Pair(nonterminal, String.valueOf(production.charAt(0))),
-							String.valueOf(production.charAt(1)));
-				}
-			}
-		}
-
-		finiteAutomata.setInitialState(startingSymbol);
-
-		return finiteAutomata;
-	}
-
-	/**
-	 * Verify if context free A context-free grammar is a grammar in which every
-	 * production rule is of the form V -> w, where V is a single nonterminal
-	 * symbol, and w is a string of terminals and/or nonterminals (w can be
-	 * empty).
-	 * 
-	 * @return - true if the grammar is context free
-	 */
-
-	public boolean isContextFree() {
-
-		// We verify that the left side of each production is a single
-		// nonterminal symbol
-		for (String nonterminal : productions.keySet()) {
-			for (String production : productions.get(nonterminal)) {
-
-				System.out.println("Verifying:" + nonterminal + "->" + production);
-
-				if (nonterminal.length() != 1) {
-					System.out.println("Failed verification, not context free!");
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	// 1 - eliminate unproductive symbols
-	/**
-	 * Non-terminal is non-productive if it cannot generate any string of
-	 * terminals if X::=w and w has only terminals, then X is productive if X:=p
-	 * and p has only productive symbols, then X is productive
-	 */
-	public void eliminateUnproductiveSymbols() {
-		System.out.println("Eliminating unproductive symbols");
-
-		List<String> productiveSymbols = new ArrayList<String>();
-		boolean prodSymbolSetChanged = true;
-
-		// We need to stop when the set of productive symbols doesn't
-		while (prodSymbolSetChanged) {
-
-			prodSymbolSetChanged = false;
-
-			for (String nonterminal : productions.keySet()) {
-
-				System.out.println("Checking if " + nonterminal + " is productive");
-				// change in an iteration
-				boolean onlyTerminals = true;
-				boolean onlyProdSymbols = true;
-
-				// For each production of a terminal we check that all the
-				// symbols
-				// in the production are either terminal or productive
-				onlyTerminals = true;
-				onlyProdSymbols = true;
-
-				// Verify each production
-				for (String production : productions.get(nonterminal)) {
-					System.out.println("Production:" + production);
-					for (char sym : production.toCharArray()) {
-						if (!alphabet.contains(String.valueOf(sym))) {
-							onlyTerminals = false;
-							if ((!productiveSymbols.contains(String.valueOf(sym))) && (sym != EPSILON)) {
-								onlyProdSymbols = false;
-							}
-						}
-					}
-				}
-
-				if (onlyTerminals || onlyProdSymbols) {
-					System.out.println("Adding " + nonterminal + " as productive.");
-					if (!productiveSymbols.contains(nonterminal)) {
-						productiveSymbols.add(nonterminal);
-						prodSymbolSetChanged = true;
-					}
-				}
-			}
-
-		}
-
-		for (String nonTerminal : nonterminals) {
-			if (!productiveSymbols.contains(nonTerminal)) {
-				eliminateSymbol(nonTerminal);
-			}
-		}
-	}
-
-	private void eliminateSymbol(String symbol) {
-		nonterminals.remove(symbol);
-		productions.remove(symbol);
-
-		Map<String, List<String>> toEliminate = new HashMap<String, List<String>>();
-
-		for (String nonterminal : productions.keySet()) {
-			for (String production : productions.get(nonterminal)) {
-				if (production.contains(symbol)) {
-
-					if (!toEliminate.containsKey(nonterminal)) {
-						toEliminate.put(nonterminal, new ArrayList<String>());
-					}
-					toEliminate.get(nonterminal).add(production);
-				}
-			}
-		}
-
-		for (String nonterminal : toEliminate.keySet()) {
-			for (String production : toEliminate.get(nonterminal)) {
-				productions.get(nonterminal).remove(production);
-				if (productions.get(nonterminal).isEmpty()) {
-					productions.remove(nonterminal);
-				}
-			}
-		}
-
-	}
-
-	/*
-	 * Remove all unit rules of the form A -> B . Whenever a rule B->u
-	 * appears, add the rule A->u.  u may be a string of variables and
-	 * terminals  Repeat until all unit rules are eliminated
-	 */
-	public void eliminateSingleProductions() {
-		System.out.println("Eliminating single productions:");
-
-		Map<String, List<String>> newProductions = new HashMap<String, List<String>>();
-		boolean containsSingleProduction = true;
-
-		while (containsSingleProduction) {
-			containsSingleProduction = false;
-
-			for (String nonterminal : productions.keySet()) {
-				
-				//Construct the list of all reachable symbols
-				List<String> values = new ArrayList<String>();
-				//Copy the initial list of symbols
-				for (String prod : productions.get(nonterminal)) {
-					values.add(prod);
-				}
-
-				//We iterate over ALLL the productions
-				for (String production : productions.get(nonterminal)) {
-					//Check if has form A->B
-					if ((production.length() == 1) && (!alphabet.contains(production)) && (!production.equals(String.valueOf(EPSILON)))) {
-						if (nonterminal.length() == 1) {
-
-							// We have a production of form A->B
-							System.out.println("Found:" + nonterminal + "->" + production);
-							containsSingleProduction = true;
-
-							// Now traverse B's productions and add the new ones
-							// to A, expanding the production
-							if (productions.get(production) != null) {
-								for (String prod : productions.get(production)) {
-									//if not contained and not ourself
-									if (!values.contains(prod)) {
-										values.add(prod);
-									}
-								}
-							}
-
-							// Eliminate B from A-s productions							
-							values.remove(production);							
-
-						}
-					}
-				}
-
-				if (!newProductions.containsKey(nonterminal)) {
-						newProductions.put(nonterminal, new ArrayList<String>());
-					}
-					newProductions.put(nonterminal, values);
-												
-			}
-			
-			productions = newProductions;
-		}
-		
-		//Check for empty symbols
-		List<String> removeKeys = new ArrayList<String>();
-		
-		for(String nonterm : productions.keySet()) {
-			 if(productions.get(nonterm).isEmpty()) {
-				 removeKeys.add(nonterm);
-			 }
-		}
-		
-		for(String key:removeKeys) {
-			eliminateSymbol(key);
-		}
-	}
 }
