@@ -113,23 +113,29 @@ public class Grammar {
 	 * @throws Exception 
 	 */
 	public void addProduction(String nonterm, String prod) throws Exception {
-		if (!productions.containsKey(nonterm)) {
+		if (!productions.containsKey(new Symbol(nonterm))) {
 			productions.put(new NonterminalSymbol(nonterm), new ArrayList<List<Symbol>>());
 		}
 		
 		List<Symbol> productionRHS = new ArrayList<Symbol>();
 		
 		for ( String symbol : prod.split("\\s+") ) {
-			if ( nonterminals.contains(symbol) ) {
-				productionRHS.add(new NonterminalSymbol(symbol));
-			} else if (alphabet.contains(symbol)) {
-				productionRHS.add(new TerminalSymbol(symbol));
-			} else {
-				throw new Exception("Unsupported Symbol");
+			
+			symbol = symbol.trim();
+			if ( !symbol.isEmpty() ) {
+				
+				if ( nonterminals.contains(new NonterminalSymbol(symbol)) ) {
+					productionRHS.add(new NonterminalSymbol(symbol));
+				} else if (alphabet.contains(new TerminalSymbol(symbol)) ) {
+					productionRHS.add(new TerminalSymbol(symbol));
+				} else if (EPSILON.equals(new Symbol(symbol)) ) {
+					productionRHS.add(EPSILON);
+				} else {
+					throw new Exception("Unsupported Symbol : " + nonterm + "->" + symbol );
+				}
 			}
 		}
-		
-		productions.get(nonterm).add(productionRHS);	
+		productions.get(new NonterminalSymbol(nonterm)).add(productionRHS);	
 	}
 
 	/**
@@ -139,15 +145,13 @@ public class Grammar {
 	 *            - array of productions
 	 * @throws Exception 
 	 */
-	public void addProductions(String[] prods) throws Exception {
+	public void addProductions(String prod) throws Exception {
 		productions.clear();
-		for (String prod : prods) {
-			String lhs = prod.split("->")[0];
-			String rhs = prod.split("->")[1];
+		String lhs = prod.split("->")[0].trim();
+		String rhs = prod.split("->")[1].trim();
 
-			for (String pr : rhs.split("\\|")) {
-				addProduction(lhs, pr);
-			}
+		for (String pr : rhs.split("\\|")) {
+			addProduction(lhs, pr);
 		}
 	}
 
@@ -168,11 +172,13 @@ public class Grammar {
 		line = reader.readLine().split(" ");
 		addAlphabet(line);
 
-		line = reader.readLine().split(" ");
-		addProductions(line);
-
 		startingSymbol = new NonterminalSymbol( reader.readLine() );
-
+		
+		String completeLine;
+		while ( (completeLine = reader.readLine()) != null ) {
+			addProductions(completeLine);			
+		}
+		
 		reader.close();
 
 	}
