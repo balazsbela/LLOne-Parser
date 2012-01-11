@@ -42,8 +42,8 @@ public class Symbol implements Comparable{
 	@Override
 	public String toString() {
 		return symbol;
-	}	
-	
+	}
+
 	@Override
 	public int compareTo(Object o) {
 		return (o instanceof Symbol) ? (symbol.compareTo(((Symbol) o).getSymbol())) : -1  ;
