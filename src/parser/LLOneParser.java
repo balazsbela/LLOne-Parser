@@ -2,7 +2,6 @@ package parser;
 
 import grammar.Grammar;
 import grammar.NonterminalSymbol;
-import grammar.Production;
 import grammar.Symbol;
 import grammar.TerminalSymbol;
 import grammar_ref.NonTerminalSymbol;
@@ -41,59 +40,71 @@ public class LLOneParser {
 	 * Initialize first.
 	 */
 	private Map<Symbol, Set<Symbol>> initFirst() {
-		Map<Symbol, Set<Symbol>> nonterminalMap = new TreeMap<Symbol, Set<Symbol>>();
-		Iterator<NonterminalSymbol> j = grammar.getNonterminals().iterator();
-		while (j.hasNext()){
+				
+		Map<Symbol, Set<Symbol>> nonterminalMap = new TreeMap<Symbol, Set<Symbol>>();	
+		for(NonterminalSymbol ns:grammar.getNonterminals()) {
 			Set<Symbol> list = new TreeSet<Symbol>();
-			nonterminalMap.put(j.next(), list);
+			nonterminalMap.put(ns, list);
 		}
+		
+		Map<Symbol, Set<Symbol>> terminalMap = new TreeMap<Symbol, Set<Symbol>>();
+		for(TerminalSymbol ts:grammar.getAlphabet()) {
+			Set<Symbol> list = new TreeSet<Symbol>();
+			list.add(ts);
+			terminalMap.put(ts, list);
+		}			
+		
+		Map<Symbol, Set<Symbol>> res = new TreeMap<Symbol, Set<Symbol>>();
+		res.putAll(terminalMap);
+		res.putAll(nonterminalMap);		
+		
+		Set<Symbol> list = new TreeSet<Symbol>();
+		list.add(Grammar.EPSILON);
+		res.put(Grammar.EPSILON,list);
+		
+		return res;
 	}
 	
+	public void printFirst(Symbol s) {
+		System.out.println("First of "+s.getSymbol()+" ");
+		for(Symbol sym : first.get(s)) {
+			System.out.print(sym+" ");
+		}
+	}
 	
 	/**
 	 * Construct the 'first'.
 	 */
 	private void createFirst(){
-		first = initFirst();
-		//printTypeFirstMap(first);
-		boolean areFirstsTheSame = true;
-		Map<Symbol, Set<Symbol>> prevF = createEmptyFirst();
-		//printTypeFirstMap(prevF);
-		Map<Symbol, Set<Symbol>> nextF = createEmptyFirst();
-		//System.out.println("NEXT");
-		//printTypeFirstMap(nextF);
+		
+		//Initialize first with empty set 
+		first = initFirst();	
+		Map<Symbol, Set<Symbol>> prevFirst = initFirst();
+		Map<Symbol, Set<Symbol>> nextFirst = initFirst();	
+		
+		boolean hasChanged = false;
+		
 		do {
-			nextF = createEmptyFirst();
-			Iterator<NonTerminalSymbol> j = grammar.getNonTerminals();
-			while (j.hasNext()){
-				NonTerminalSymbol A = j.next();
-				//System.out.println("Processing nonterminal "+A);
-				Iterator<Production> it = grammar.getProductionsOf(A);
-				while (it.hasNext()){
-					Production p = it.next();
-					//System.out.println("\tProcessing production "+p);
-					List<Symbol> Xi = p.getRhs();
-					Symbol X1 = Xi.get(0);
-					//System.out.println("\tFirst symbol of RHS "+X1+" with First "+prevF.get(X1));
-					if (prevF.get(X1).size()!=0){
-						//System.out.println("\tAdding "+X1);
-						nextF.get(A).addAll(prevF.get(X1));
+			
+			for(NonterminalSymbol A : grammar.getNonterminals()) {
+				for(List<Symbol> prod:grammar.getProduction(A.getSymbol())) {
+					if(prevFirst.get(prod.get(0)).size()!=0) {
+						nextFirst.get(A).addAll(prevFirst.get(prod.get(0)));
 					}
 				}
 			}
-			areFirstsTheSame = true;
-			for (Symbol s : prevF.keySet()){
-				if (prevF.get(s).size()!=nextF.get(s).size()){
-					areFirstsTheSame = false;
+			
+			hasChanged = false;
+			for(Symbol s : prevFirst.keySet()) {
+				if(prevFirst.get(s).size() != nextFirst.get(s).size()) {
+					hasChanged = true;
 				}
 			}
-			System.out.println("TempFirst:");
-			printTypeFirstMap(prevF);
-			prevF = nextF;
-		} while(!areFirstsTheSame);
-		first = nextF;
-		System.out.println("First:");
-		printTypeFirstMap(first);
+			
+			prevFirst = nextFirst;
+		}
+		while(hasChanged);
+		first = nextFirst;
 	}
 	
 	

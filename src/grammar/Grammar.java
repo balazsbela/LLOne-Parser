@@ -112,7 +112,7 @@ public class Grammar {
 	 * @throws Exception 
 	 */
 	public void addProduction(String nonterm, String prod) throws Exception {
-		if (!productions.containsKey(new Symbol(nonterm))) {
+		if (!productions.containsKey(new NonterminalSymbol(nonterm))) {
 			productions.put(new NonterminalSymbol(nonterm), new ArrayList<List<Symbol>>());
 		}
 		
