@@ -1,7 +1,5 @@
 package grammar;
 
-import grammar_ref.TerminalSymbol;
-
 public class Symbol implements Comparable{
 
 	private String symbol;

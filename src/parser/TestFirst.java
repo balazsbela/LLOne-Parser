@@ -8,6 +8,7 @@ public class TestFirst {
 		g.loadFromFile("grammar2.txt");
 		
 		LLOneParser parser = new LLOneParser(g);
+		
 		parser.printFirst(new Symbol("S"));
 	}
 }
