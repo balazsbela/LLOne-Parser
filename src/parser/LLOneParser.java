@@ -1,6 +1,7 @@
 package parser;
 
 import grammar.Grammar;
+import grammar.NonterminalSymbol;
 import grammar.Production;
 import grammar.Symbol;
 import grammar.TerminalSymbol;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class LLOneParser {
 	/** The grammar. */
@@ -37,8 +40,13 @@ public class LLOneParser {
 	/**
 	 * Initialize first.
 	 */
-	private void initFirst() {
-		
+	private Map<Symbol, Set<Symbol>> initFirst() {
+		Map<Symbol, Set<Symbol>> nonterminalMap = new TreeMap<Symbol, Set<Symbol>>();
+		Iterator<NonterminalSymbol> j = grammar.getNonterminals().iterator();
+		while (j.hasNext()){
+			Set<Symbol> list = new TreeSet<Symbol>();
+			nonterminalMap.put(j.next(), list);
+		}
 	}
 	
 	
