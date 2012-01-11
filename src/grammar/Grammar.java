@@ -22,7 +22,7 @@ public class Grammar {
 	}
 
 	/**
-	 * Get the set of non terminal symbolzzzzZZ
+	 * Get the set of non terminal symbols
 	 * 
 	 * @return - the set of non terminal symbols
 	 */
