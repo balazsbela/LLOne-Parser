@@ -2,6 +2,7 @@ package parser;
 
 import grammar.Grammar;
 import grammar.NonterminalSymbol;
+import grammar.Production;
 import grammar.Symbol;
 import grammar.TerminalSymbol;
 
@@ -26,16 +27,25 @@ public class LLOneParser {
 	/** The 'follow' construction. */
 	private Map<NonterminalSymbol, Set<Symbol>> follow;
 
+	/** The LL1 Table */
+	public Map<SymbolPair , TableCell> table;
+	
+	private Symbol dollar = Grammar.EPSILON;
+	
+	/** Production Indexing */
+	private Production[] productions;
+	
 	/** The 'alpha' stack, initially containing the input sequence. */
 	private Stack<TerminalSymbol> alpha;
 
 	/** The 'beta' stack, initially containing the starting symbol. */
 	private Stack<Symbol> beta;
 
-	public LLOneParser(Grammar g) {
+	public LLOneParser(Grammar g) throws Exception {
 		grammar = g;
 		createFirst();
 	    createFollow();
+	    constructTable();
 	}
 
 	/**
@@ -232,6 +242,78 @@ public class LLOneParser {
 			follow.get(nonterm).addAll(followAfter.get(nonterm));
 		}
 
+	}
+	
+	private void indexProductions() {
+
+		int productionCount = 0;
+		for ( NonterminalSymbol nonterm : grammar.getProductions().keySet() ) {
+			productionCount += grammar.getProductions(nonterm).size();
+		}
+		
+		productions = new Production[productionCount + 1];
+		int i = 1;
+		
+		for ( NonterminalSymbol nonterm : grammar.getNonterminals() ) {
+			for ( List<Symbol> prod : grammar.getProductions(nonterm) ) {
+				productions[i] = new Production(nonterm, prod);
+				i++;
+			}
+		}
+	}
+	
+	private int findProductionIndex(NonterminalSymbol nonterm, List<Symbol> prod) {
+		for (int i=1 ; i<productions.length ; i++) {
+			if ( productions[i].equals(new Production(nonterm, prod)) ) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private void constructTable() throws Exception {
+		
+		// make indexing
+		indexProductions();
+		
+		// construct table
+		table = new HashMap<SymbolPair, TableCell>();
+		
+		for ( NonterminalSymbol s1 : grammar.getNonterminals() ) {
+			List<Symbol> terminalAndDollar = new ArrayList<Symbol>();
+			terminalAndDollar.addAll( grammar.getAlphabet() );
+			terminalAndDollar.add(dollar);
+			for ( Symbol s2 : terminalAndDollar) {
+				
+				SymbolPair pair = new SymbolPair(s1, s2);
+				
+				for (List<Symbol> production : grammar.getProductions(s1)) {
+					
+					Symbol firstSymbol = production.get(0);
+					if ( !firstSymbol.equals(Grammar.EPSILON) && first.get(firstSymbol).contains(s2) ) {
+						if ( table.containsKey(pair) ) {
+							throw new Exception("CONFLICT");
+						}
+						table.put( pair , new TableCell(production, findProductionIndex(s1, production) ));
+					}
+					if ( first.get(firstSymbol).contains(Grammar.EPSILON) && follow.get(s1).contains(s2) ) {
+						if ( table.containsKey(pair) ) {
+							throw new Exception("CONFLICT");
+						}
+						table.put( pair , new TableCell(production, findProductionIndex(s1, production) ));
+					}
+					
+				}
+			}
+			
+		}
+		
+		for ( TerminalSymbol term : grammar.getAlphabet() ) {
+			table.put( new SymbolPair(term, term) , TableCell.pop);
+		}
+		
+		table.put( new SymbolPair(dollar, dollar) , TableCell.accept);
+		
 	}
 
 }
