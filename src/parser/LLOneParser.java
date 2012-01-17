@@ -101,7 +101,7 @@ public class LLOneParser {
 		Set<Symbol> result = new HashSet<Symbol>();
 		for(Symbol s1:alpha) {
 			for(Symbol s2:beta) {
-				if(s1.equals(grammar.EPSILON)) {
+				if(s1.equals(Grammar.EPSILON)) {
 					result.add(s2);
 				}
 				else {
@@ -130,17 +130,26 @@ public class LLOneParser {
 			for (NonterminalSymbol A : grammar.getNonterminals()) {
 				for (List<Symbol> prod : grammar.getProductions(A)) {
 					Set<Symbol> tempSet = new HashSet<Symbol>();
-					tempSet.add(grammar.EPSILON);
+					//tempSet.add(grammar.EPSILON);
+					boolean emptyPervFirst = false;
 					
-					for(Symbol s : prod){
+					for(Symbol s : prod) {
 						if(prevFirst.get(s).isEmpty()) {
-							continue;
+							emptyPervFirst = true;
+							break;
 						}
 						else {
-							tempSet = plus(tempSet,prevFirst.get(s));
+							if (tempSet.isEmpty()) {
+								tempSet.addAll(prevFirst.get(s));
+							} else {
+								tempSet = plus(tempSet,prevFirst.get(s));
+							}
 						}
 					}
-					nextFirst.get(A).addAll(tempSet);
+					nextFirst.get(A).addAll(prevFirst.get(A));
+					if (!emptyPervFirst) {
+						nextFirst.get(A).addAll(tempSet);
+					}
 				}				
 			}
 			
@@ -292,13 +301,13 @@ public class LLOneParser {
 					Symbol firstSymbol = production.get(0);
 					if ( !firstSymbol.equals(Grammar.EPSILON) && first.get(firstSymbol).contains(s2) ) {
 						if ( table.containsKey(pair) ) {
-							throw new Exception("CONFLICT");
+							throw new Exception("CONFLICT at " + pair.getSymbol1() + " " + pair.getSymbol2() );
 						}
 						table.put( pair , new TableCell(production, findProductionIndex(s1, production) ));
 					}
 					if ( first.get(firstSymbol).contains(Grammar.EPSILON) && follow.get(s1).contains(s2) ) {
 						if ( table.containsKey(pair) ) {
-							throw new Exception("CONFLICT");
+							throw new Exception("CONFLICT at " + pair.getSymbol1() + " " + pair.getSymbol2() );
 						}
 						table.put( pair , new TableCell(production, findProductionIndex(s1, production) ));
 					}
