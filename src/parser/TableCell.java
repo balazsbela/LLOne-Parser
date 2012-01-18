@@ -18,6 +18,7 @@ public class TableCell {
 	public TableCell(List<Symbol>  alpha ,int prodNr) {
 		this.alpha = alpha;
 		productionNr = prodNr;
+		name = "PUSH";
 	}
 	
 	public List<Symbol> getAlpha() {

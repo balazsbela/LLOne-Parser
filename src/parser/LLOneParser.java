@@ -6,6 +6,9 @@ import grammar.Production;
 import grammar.Symbol;
 import grammar.TerminalSymbol;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,11 +38,18 @@ public class LLOneParser {
 	/** Production Indexing */
 	private Production[] productions;
 	
+	/** Sequence to parse */
+	private List<Symbol> sequence;
+	
 	/** The 'alpha' stack, initially containing the input sequence. */
-	private Stack<TerminalSymbol> alpha;
+	private Stack<Symbol> alpha;
 
 	/** The 'beta' stack, initially containing the starting symbol. */
 	private Stack<Symbol> beta;
+
+	/** The 'pi' stack, output stack. */
+	private Stack<Integer> pi;
+	
 
 	public LLOneParser(Grammar g) throws Exception {
 		grammar = g;
@@ -324,5 +334,85 @@ public class LLOneParser {
 		table.put( new SymbolPair(dollar, dollar) , TableCell.accept);
 		
 	}
+	
+	public void loadSequence(String fileName) throws Exception {
+		
+		BufferedReader reader = new BufferedReader(new FileReader(fileName));
+		String[] line = reader.readLine().split(" ");
+		
+		sequence = new ArrayList<Symbol>();
+		
+		for (String symbol : line) {
+			sequence.add(new TerminalSymbol(symbol));
+		}
+		
+		reader.close();		
+		
+	}
+	
 
+	private void initConfig() {
+		
+		alpha = new Stack<Symbol>();
+		beta = new Stack<Symbol>();
+		pi = new Stack<Integer>();
+		
+		alpha.push(dollar);
+		for ( int i=sequence.size()-1 ; i>=0 ; i-- ) {
+			alpha.push( sequence.get(i) );
+		}
+		
+		beta.push(dollar);
+		beta.push(grammar.getStartingSymbol());
+		
+	}
+	
+	public void parse() throws Exception {
+		
+		initConfig();
+		
+		String action = "";
+		
+		while (!action.equals("ACCEPT")) {
+			
+			Symbol beta1 = beta.pop();
+			Symbol alpha1 = alpha.peek();
+			
+			if ( beta==null || alpha==null ) {
+				throw new Exception("ERROR: stack are empty");
+			}
+			
+			
+			SymbolPair pair = new SymbolPair(beta1, alpha1);	
+			if ( table.containsKey( pair ) ) {
+				
+				TableCell cell = table.get(pair);
+				action = cell.getName();
+				
+				if (action.equals("PUSH")) {
+					
+					for (int i=cell.getAlpha().size()-1 ; i>=0 ; i--) {
+						if (!cell.getAlpha().get(i).equals(Grammar.EPSILON)) {
+							beta.push( cell.getAlpha().get(i) );
+						}
+					}
+					pi.push( cell.getProductionNr() );
+					
+				}
+				
+				if (action.equals("POP")) {
+					alpha.pop();
+				}
+				
+				
+			} else {
+				throw new Exception("ERROR at: (" + beta1 + "," + alpha1 + ")");
+			}
+			
+		
+			
+		}
+		
+	}
+	
 }
