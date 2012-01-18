@@ -1,6 +1,7 @@
 package test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import grammar.Grammar;
 import grammar.NonterminalSymbol;
@@ -73,7 +74,6 @@ public class LanguageParseTest {
 			}			
 		}
 		
-		
 		Scanner scanner = new Scanner();
 		try {
 			scanner.scan("mycode.jdc");
@@ -84,14 +84,15 @@ public class LanguageParseTest {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+				
+		System.out.println("PIF");
+		parser.sequence = new ArrayList<Symbol>();
 		for(PifEntry pe : scanner.getPif()) { 
 			System.out.println(scanner.getSymbol(pe.getCode())+ "-"+pe.getCode());
 			parser.sequence.add( new NonterminalSymbol(scanner.getSymbol(pe.getCode())) );
-		}
+		}				
 		
-		
-		
+		System.out.println("PARSING");
 		try {
 			//parser.loadSequence("sequence.txt");
 			parser.parse();
