@@ -152,6 +152,9 @@ public class Scanner {
 
 	
 	private boolean isIdentifier(String token)  {
+		if ( Character.isDigit( token.charAt(0) ) ) {
+			return false;
+		}
 		for(char c: token.toCharArray()) {
 			if(!Character.isLetterOrDigit(c)) {
 				return false;
@@ -229,4 +232,18 @@ public class Scanner {
 			 System.out.println(e.getMessage() + " at line " + scanner.getNrRows());
 		}
 	}
+
+	 public String getSymbol(int code) {
+    	if(code == 0) return "identifier";
+    	if(code == 1) return "constant";
+    	
+		Set<Entry<String,Integer>> entrySet = codeMapping.entrySet();
+		
+		for(Entry<String,Integer> entry : entrySet) {
+			if(entry.getValue() == code) {
+				return entry.getKey();
+			}
+		}
+		return null;
+    }
 }

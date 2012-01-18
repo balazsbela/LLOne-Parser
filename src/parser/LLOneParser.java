@@ -39,7 +39,7 @@ public class LLOneParser {
 	private Production[] productions;
 	
 	/** Sequence to parse */
-	private List<Symbol> sequence;
+	public List<Symbol> sequence;
 	
 	/** The 'alpha' stack, initially containing the input sequence. */
 	private Stack<Symbol> alpha;
@@ -56,9 +56,6 @@ public class LLOneParser {
 	
 	public LLOneParser(Grammar g) throws Exception {
 		grammar = g;
-		createFirst();
-	    createFollow();
-	    constructTable();
 	}
 
 	/**
@@ -128,7 +125,7 @@ public class LLOneParser {
 	/**
 	 * Construct the 'first'.
 	 */
-	private void createFirst() {
+	public void createFirst() {
 
 		// Initialize first with empty set
 		first = initFirst();
@@ -293,7 +290,7 @@ public class LLOneParser {
 		return -1;
 	}
 	
-	private void constructTable() throws Exception {
+	public void constructTable() throws Exception {
 		
 		// make indexing
 		indexProductions();
@@ -430,5 +427,13 @@ public class LLOneParser {
 			
 		}
 		
+	}
+	
+	public Map<Symbol, Set<Symbol>> getFirst() {
+		return first;
+	}
+	
+	public Map<NonterminalSymbol, Set<Symbol>> getFollow() {
+		return follow;
 	}
 }
