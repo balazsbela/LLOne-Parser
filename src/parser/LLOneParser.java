@@ -50,7 +50,10 @@ public class LLOneParser {
 	/** The 'pi' stack, output stack. */
 	private Stack<Integer> pi;
 	
-
+	
+	/** The Syntax Tree*/
+	public SyntaxTree syntaxTree;
+	
 	public LLOneParser(Grammar g) throws Exception {
 		grammar = g;
 		createFirst();
@@ -412,7 +415,20 @@ public class LLOneParser {
 		
 			
 		}
+		constructTree();
 		
 	}
 	
+	
+	private void constructTree() throws Exception {
+		
+		syntaxTree = new TableSyntaxTree();
+		
+		for (Integer prod : pi) {
+			syntaxTree.add( productions[prod] );
+			
+			
+		}
+		
+	}
 }
