@@ -70,7 +70,7 @@ public class TableSyntaxTree implements SyntaxTree {
 		else {
 			int leftMostNonTerminalIndex = getLeftMostNonTerminalLeaf();
 			STCell cell = table.get(leftMostNonTerminalIndex);
-			if(cell.getElement() != p.getNonterminal()) {
+			if(!cell.getElement().equals(p.getNonterminal())) {
 				throw new Exception("Leftmost leaf has diferent symbol then lhs of the production");
 			}
 			
@@ -87,7 +87,7 @@ public class TableSyntaxTree implements SyntaxTree {
 		}
 	}	
 	
-	private void printTable() {
+	public void printTable() {
 		for(int i=0;i<table.size();i++) {
 			STCell cell = table.get(i);
 			Symbol s = cell.getElement();
