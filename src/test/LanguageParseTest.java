@@ -61,7 +61,7 @@ public class LanguageParseTest {
 		parser.constructTable();
 		
 		for ( SymbolPair pair : parser.table.keySet() ) {
-			System.out.print( "(" + pair.getSymbol1()  + "," + pair.getSymbol2() + ") = " );
+			System.out.print( "(" + pair.getSymbol1() + "," + pair.getSymbol2() + ") = " );
 			
 			TableCell cell = parser.table.get(pair);
 			if (cell.getName()!=null) {
@@ -74,10 +74,9 @@ public class LanguageParseTest {
 			}			
 		}
 		
-		
 		Scanner scanner = new Scanner();
 		try {
-			scanner.scan("mycode2.jdc");
+			scanner.scan("mycode.jdc");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -85,15 +84,15 @@ public class LanguageParseTest {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+				
+		System.out.println("PIF");
 		parser.sequence = new ArrayList<Symbol>();
 		for(PifEntry pe : scanner.getPif()) { 
 			System.out.println(scanner.getSymbol(pe.getCode())+ "-"+pe.getCode());
 			parser.sequence.add( new NonterminalSymbol(scanner.getSymbol(pe.getCode())) );
-		}
+		}				
 		
-		
-		
+		System.out.println("PARSING");
 		try {
 			//parser.loadSequence("sequence.txt");
 			parser.parse();

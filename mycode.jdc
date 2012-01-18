@@ -3,25 +3,23 @@ numb A be 2;
 numb D be 30;
 char C be 'a';
 numb i be 0;
+numb F be 0;		
 
 more<numb>[10] v;
 
-when A isnot D 
+when (A isnot D)
 	hi
-		work D bigger A 
-			hi	
-				message D
-				message " still bigger than " 
-				message A
-				numb F be 0;
-				ask F;
-				
-				A be A + F;
+		work (D bigger A)
+			hi
+				message D;
+				message "still bigger than";
+				message A;		
+				ask F;							
 				v[i] be A;
-				i be i+1;
+				i be i+1;		
 			bye
 	bye
 otherwise 	
 	hi
-		message "ok"
+		message "ok";
 	bye	

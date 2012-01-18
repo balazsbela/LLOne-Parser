@@ -25,7 +25,7 @@ public class Symbol implements Comparable{
 		if (this == obj)
 			return true;
 		if (obj == null)
-			return false;
+			return false;		
 		Symbol other = (Symbol) obj;
 		if (symbol == null) {
 			if (other.symbol != null)

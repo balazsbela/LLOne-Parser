@@ -45,6 +45,9 @@ public class Scanner {
 	            String token = detect(reader);
 	           // System.out.println(token);
 	            
+	            if(token.isEmpty()) {
+	            	continue;
+	            }
 	            if(operators.contains(token.charAt(0)) || 
 	               separators.contains(token.charAt(0)) ||
 	               reservedWords.contains(token) ) {
