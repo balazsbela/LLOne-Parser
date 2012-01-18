@@ -7,6 +7,22 @@ public class Production {
 	private NonterminalSymbol nonterminal;
 	private List<Symbol> production;
 	
+	public NonterminalSymbol getNonterminal() {
+		return nonterminal;
+	}
+
+	public void setNonterminal(NonterminalSymbol nonterminal) {
+		this.nonterminal = nonterminal;
+	}
+
+	public List<Symbol> getProduction() {
+		return production;
+	}
+
+	public void setProduction(List<Symbol> production) {
+		this.production = production;
+	}
+
 	public Production(NonterminalSymbol nonterm, List<Symbol> prod) {
 		nonterminal = nonterm;
 		production = prod;
