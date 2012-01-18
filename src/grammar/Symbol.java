@@ -26,8 +26,6 @@ public class Symbol implements Comparable{
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		Symbol other = (Symbol) obj;
 		if (symbol == null) {
 			if (other.symbol != null)

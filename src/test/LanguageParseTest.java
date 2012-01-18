@@ -1,6 +1,7 @@
 package test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import grammar.Grammar;
 import grammar.NonterminalSymbol;
@@ -60,7 +61,7 @@ public class LanguageParseTest {
 		parser.constructTable();
 		
 		for ( SymbolPair pair : parser.table.keySet() ) {
-			System.out.print( "(" + pair.getSymbol1() + "," + pair.getSymbol2() + ") = " );
+			System.out.print( "(" + pair.getSymbol1()  + "," + pair.getSymbol2() + ") = " );
 			
 			TableCell cell = parser.table.get(pair);
 			if (cell.getName()!=null) {
@@ -76,7 +77,7 @@ public class LanguageParseTest {
 		
 		Scanner scanner = new Scanner();
 		try {
-			scanner.scan("mycode.jdc");
+			scanner.scan("mycode2.jdc");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -85,6 +86,7 @@ public class LanguageParseTest {
 			e1.printStackTrace();
 		}
 		
+		parser.sequence = new ArrayList<Symbol>();
 		for(PifEntry pe : scanner.getPif()) { 
 			System.out.println(scanner.getSymbol(pe.getCode())+ "-"+pe.getCode());
 			parser.sequence.add( new NonterminalSymbol(scanner.getSymbol(pe.getCode())) );
