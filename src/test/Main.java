@@ -7,7 +7,6 @@ import parser.SymbolPair;
 import parser.TableCell;
 import parser.TableSyntaxTree;
 
-
 public class Main {
 
 	public static void main(String[] args) {
@@ -58,7 +57,9 @@ public class Main {
 		((TableSyntaxTree)parser.syntaxTree).printTable();
 		
 		for (Symbol s : parser.syntaxTree.getSymbolLeaves() ) {
-			System.out.print(s + " ");
+			if(!s.equals(Grammar.EPSILON)) {
+				System.out.print(s );
+			}
 		}
 	}
 	
