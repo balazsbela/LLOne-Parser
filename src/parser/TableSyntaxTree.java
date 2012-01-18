@@ -1,14 +1,14 @@
 package parser;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.activity.InvalidActivityException;
-
 import grammar.NonterminalSymbol;
 import grammar.Production;
 import grammar.Symbol;
-import grammar_ref.NonTerminalSymbol;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.activity.InvalidActivityException;
 
 public class TableSyntaxTree implements SyntaxTree {
 	class STCell {
@@ -43,6 +43,8 @@ public class TableSyntaxTree implements SyntaxTree {
 	}
 	
 	List<STCell> table = new ArrayList<STCell>();
+		
+	List<Integer> leaves = new ArrayList<Integer>();
 	
 	public TableSyntaxTree() {
 		
@@ -112,13 +114,7 @@ public class TableSyntaxTree implements SyntaxTree {
 	
 	
 	private List<Integer> getLeaves() {
-		List<Integer> leaves = new ArrayList<Integer>();
-		for(int i=0;i<table.size();i++) {
-			if(isLeaf(i)) {
-				leaves.add(i);
-			}
-		}
-		
+		traverse(0);
 		return leaves;
 	}
 	
@@ -144,6 +140,29 @@ public class TableSyntaxTree implements SyntaxTree {
 		}
 		
 		throw new InvalidActivityException("No more nonterminal leaves");
+	}
+	
+	public void traverse(int index) {
+		
+		List<Integer> children = getChildren(index);
+		Integer leftMost = null;
+		for(int i : children) {
+			if(table.get(i).leftSibling == null) {
+				leftMost = i;
+				break;
+			}
+		}
+		
+		children.remove(leftMost);
+		Collections.sort(children);
+		children.add(0, leftMost);
+		
+		for(int j:children) {
+			if(isLeaf(j)) {
+				leaves.add(j);
+			}
+			traverse(j);
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {
