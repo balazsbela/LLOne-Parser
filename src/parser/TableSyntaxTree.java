@@ -114,6 +114,7 @@ public class TableSyntaxTree implements SyntaxTree {
 	
 	
 	private List<Integer> getLeaves() {
+		leaves.clear();
 		traverse(0);
 		return leaves;
 	}
@@ -145,6 +146,11 @@ public class TableSyntaxTree implements SyntaxTree {
 	public void traverse(int index) {
 		
 		List<Integer> children = getChildren(index);
+		
+		if(children.isEmpty()) {
+			return;
+		}
+		
 		Integer leftMost = null;
 		for(int i : children) {
 			if(table.get(i).leftSibling == null) {

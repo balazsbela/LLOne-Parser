@@ -1,0 +1,6 @@
+S F T
++ * ( ) a
+S
+S -> S + T | T
+T -> T * F | F
+F -> ( S ) | a
