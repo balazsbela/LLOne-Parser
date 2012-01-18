@@ -39,7 +39,7 @@ public class LLOneParser {
 	private Production[] productions;
 	
 	/** Sequence to parse */
-	public List<Symbol> sequence;
+	public List<Symbol> sequence = new ArrayList<Symbol>();
 	
 	/** The 'alpha' stack, initially containing the input sequence. */
 	private Stack<Symbol> alpha;
